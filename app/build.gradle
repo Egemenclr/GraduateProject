@@ -40,12 +40,20 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     def camerax_version = "1.0.0-rc01"
-// CameraX core library using camera2 implementation
+    // CameraX core library using camera2 implementation
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-camera2:$camerax_version"
-// CameraX Lifecycle Library
+    // CameraX Lifecycle Library
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
-// CameraX View class
+    // CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha20"
+
+    // socket.io
+    implementation 'com.github.nkzawa:socket.io-client:0.6.0'
+
+    //Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+
+
 
 }

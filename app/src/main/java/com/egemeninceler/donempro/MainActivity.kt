@@ -12,6 +12,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -21,7 +23,7 @@ import java.util.concurrent.Executors
 typealias LumaListener = (byte: ByteArray) -> Unit
 
 class MainActivity : AppCompatActivity() {
-    //camera variable initialization
+    //Camera variable initialization
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
 
@@ -29,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -70,6 +71,19 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             //Rotate and set image to frame that comming from analyzer
                             imageView.setImageBitmap(rotate90FImage(it))
+
+                            // Socket connection and send data.
+                            GlobalScope.async {
+                                val address = "localip"
+                                val port = 9999
+
+                                // Resim gönderilecekken while frame varken gönderilecek.
+                                // parametre olarak bytearray de verilecek.
+                                val client = Client(address, port)
+                                client.run()
+
+                            }
+
                         }
 
                     })
@@ -151,7 +165,7 @@ class MainActivity : AppCompatActivity() {
 
 
 }
-
+//Camerax listener.
 private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
 
     private fun ByteBuffer.toByteArray(): ByteArray {
