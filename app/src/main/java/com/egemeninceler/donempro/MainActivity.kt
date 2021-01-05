@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,7 +42,15 @@ class MainActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+
+
+
+
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+//        val f = File("/sdcard/DCIM/100ANDRO/DSC_0001.JPG")
+//        val bitmap2 = BitmapFactory.decodeFile(f.absolutePath)
+//        imageView.setImageBitmap(bitmap2)
 
 
     }
@@ -62,6 +72,8 @@ class MainActivity : AppCompatActivity() {
             imageCapture = ImageCapture.Builder()
                 .build()
 
+
+
             // Camerax imageAnalyzer
             // Take frame from camerax
             val imageAnalyzer = ImageAnalysis.Builder()
@@ -71,20 +83,17 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             //Rotate and set image to frame that comming from analyzer
                             imageView.setImageBitmap(rotate90FImage(it))
-
-                            // Socket connection and send data.
-                            GlobalScope.async {
-                                val address = "localip"
-                                val port = 9999
-
-                                // Resim gönderilecekken while frame varken gönderilecek.
-                                // parametre olarak bytearray de verilecek.
-                                val client = Client(address, port)
-                                client.run()
-
-                            }
-
                         }
+                        // Socket connection and send data.
+                        GlobalScope.async {
+                            val address = "192.168.1.103"
+                            val port = 8989
+                            val client = Client(address, port)
+                            client.write(it)
+
+//                            client.read()
+                        }
+
 
                     })
                 }
@@ -151,6 +160,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun rotate90FImage(bytes: ByteArray): Bitmap? {
         val matrix = Matrix()
+
         matrix.postRotate(90.toFloat())
         return Bitmap.createBitmap(
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size),
@@ -165,6 +175,7 @@ class MainActivity : AppCompatActivity() {
 
 
 }
+
 //Camerax listener.
 private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
 
@@ -196,7 +207,11 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
         yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 50, out)
         val imageBytes = out.toByteArray()
 
+        val daa = yBuffer.toByteArray()
+        val pixels = daa.map { it.toInt() and 0xFF }
 
+
+        Thread.sleep(10)
         listener(imageBytes)
 
         image.close()

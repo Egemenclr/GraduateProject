@@ -1,37 +1,54 @@
 package com.egemeninceler.donempro
 
-import java.io.OutputStream
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
+import kotlinx.coroutines.delay
+import java.io.*
+import java.net.ServerSocket
 import java.net.Socket
 import java.nio.charset.Charset
 import java.util.*
-import kotlin.concurrent.thread
 
 class Client(address: String, port: Int) {
     private val connection: Socket = Socket(address, port)
     private var connected: Boolean = true
 
+//    val server = ServerSocket(9999)
+//    val client = server.accept()
+
+
     init {
         println("Connected to server at $address on port $port")
+
+
     }
 
-    private val reader: Scanner = Scanner(connection.getInputStream())
+
     private val writer: OutputStream = connection.getOutputStream()
 
-    fun run() {
-        thread { read() }
-        while (connected) {
-            connected = false
-            write("hello from android")
-        }
+    fun write(bytes: ByteArray) {
+        val baos = ByteArrayOutputStream()
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        resizeImage(bitmap).compress(Bitmap.CompressFormat.JPEG, 50, baos)
+        val byteArray = baos.toByteArray()
 
+        writer.write(byteArray)
+        writer.flush()
     }
 
-    private fun write(message: String) {
-        writer.write((message + '\n').toByteArray(Charset.defaultCharset()))
-    }
+//    fun read() {
+//        println("Connected to server at: ${server.inetAddress}")
+//        println("Connected to server at: ${server.channel}")
+//
+//        val client: Socket = client
+//        val reader: Scanner = Scanner(client.getInputStream())
+//        val text = reader.nextLine()
+//        println(text)
+//    }
 
-    private fun read() {
-        while (connected)
-            println(reader.nextLine())
+    fun resizeImage(bitmap: Bitmap): Bitmap {
+        return Bitmap.createScaledBitmap(bitmap, 640, 480, true)
+
     }
 }
