@@ -2,7 +2,9 @@ package com.egemeninceler.donempro
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.*
+import android.graphics.ImageFormat
+import android.graphics.Rect
+import android.graphics.YuvImage
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -13,8 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     //Camera variable initialization
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
-
+    lateinit var client: Client
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +43,13 @@ class MainActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+
+
+
+
+
+
+
 
 
 
@@ -73,27 +81,35 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
 
-
             // Camerax imageAnalyzer
             // Take frame from camerax
+
             val imageAnalyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, LuminosityAnalyzer {
-                        runOnUiThread {
-                            //Rotate and set image to frame that comming from analyzer
-                            imageView.setImageBitmap(rotate90FImage(it))
-                        }
+//                        runOnUiThread {
+//                            //Rotate and set image to frame that comming from analyzer
+//
+//                            //imageView.setImageBitmap(rotate90FImage(it))
+//
+//                        }
                         // Socket connection and send data.
-                        GlobalScope.async {
-                            val address = "192.168.1.103"
-                            val port = 8989
-                            val client = Client(address, port)
-                            client.write(it)
+                        GlobalScope.launch {
 
-//                            client.read()
+                            try {
+                                val address = "192.168.1.103"
+                                val port = 8989
+
+                                client = Client(address, port)
+                                client.write(it)
+
+
+                            } catch (e: Exception) {
+                                println("hataaaaaa")
+                                e.printStackTrace()
+                            }
                         }
-
 
                     })
                 }
@@ -158,21 +174,6 @@ class MainActivity : AppCompatActivity() {
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 
-    private fun rotate90FImage(bytes: ByteArray): Bitmap? {
-        val matrix = Matrix()
-
-        matrix.postRotate(90.toFloat())
-        return Bitmap.createBitmap(
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size),
-            0,
-            0,
-            640,
-            480,
-            matrix,
-            true
-        )
-    }
-
 
 }
 
@@ -190,6 +191,7 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
     }
 
     override fun analyze(image: ImageProxy) {
+//        Thread.sleep(100)
         // Take frame from camera
         val yBuffer = image.planes[0].buffer // Y
         val vuBuffer = image.planes[2].buffer // VU
@@ -202,16 +204,15 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
         yBuffer.get(nv21, 0, ySize)
         vuBuffer.get(nv21, ySize, vuSize)
 
+
         val yuvImage = YuvImage(nv21, ImageFormat.NV21, image.width, image.height, null)
         val out = ByteArrayOutputStream()
         yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 50, out)
         val imageBytes = out.toByteArray()
 
-        val daa = yBuffer.toByteArray()
-        val pixels = daa.map { it.toInt() and 0xFF }
-
-
-        Thread.sleep(10)
+//        val daa = yBuffer.toByteArray()
+//        val pixels = daa.map { it.toInt() and 0xFF }
+//        println(imageBytes)
         listener(imageBytes)
 
         image.close()

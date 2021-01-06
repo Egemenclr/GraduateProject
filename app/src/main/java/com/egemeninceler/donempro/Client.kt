@@ -1,40 +1,36 @@
 package com.egemeninceler.donempro
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
-import kotlinx.coroutines.delay
-import java.io.*
-import java.net.ServerSocket
+import com.egemeninceler.donempro.util.rotate90FImage
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 import java.net.Socket
-import java.nio.charset.Charset
-import java.util.*
 
 class Client(address: String, port: Int) {
-    private val connection: Socket = Socket(address, port)
-    private var connected: Boolean = true
-
-//    val server = ServerSocket(9999)
-//    val client = server.accept()
-
-
+    private var connection: Socket = Socket(address, port)
     init {
-        println("Connected to server at $address on port $port")
 
+//        println("Connected to server at $address port $port")
 
+        connection.soTimeout = 10000
+        println("timeout:" +connection.soTimeout)
     }
-
 
     private val writer: OutputStream = connection.getOutputStream()
 
     fun write(bytes: ByteArray) {
+        println(bytes)
         val baos = ByteArrayOutputStream()
-        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-        resizeImage(bitmap).compress(Bitmap.CompressFormat.JPEG, 50, baos)
+//        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        val bitmap = rotate90FImage(bytes)
+        resizeImage(bitmap!!).compress(Bitmap.CompressFormat.JPEG, 50, baos)
         val byteArray = baos.toByteArray()
 
+
         writer.write(byteArray)
+        writer.write("sended".toByteArray())
         writer.flush()
+        baos.flush()
     }
 
 //    fun read() {

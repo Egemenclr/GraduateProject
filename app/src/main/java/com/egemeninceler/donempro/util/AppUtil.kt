@@ -1,0 +1,20 @@
+package com.egemeninceler.donempro.util
+
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+
+fun rotate90FImage(bytes: ByteArray): Bitmap? {
+    val matrix = Matrix()
+
+    matrix.postRotate(90.toFloat())
+    return Bitmap.createBitmap(
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size),
+        0,
+        0,
+        640,
+        480,
+        matrix,
+        true
+    )
+}
