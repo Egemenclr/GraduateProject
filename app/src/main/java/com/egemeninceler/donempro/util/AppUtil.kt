@@ -12,7 +12,7 @@ fun rotate90FImage(bytes: ByteArray): Bitmap? {
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size),
         0,
         0,
-        640,
+        600,
         480,
         matrix,
         true

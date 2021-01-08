@@ -13,14 +13,17 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.egemeninceler.donempro.util.rotate90FImage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+import java.lang.reflect.Field;
 
 typealias LumaListener = (byte: ByteArray) -> Unit
 
@@ -28,13 +31,22 @@ class MainActivity : AppCompatActivity() {
     //Camera variable initialization
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
-    lateinit var client: Client
-
+    var client: Client? = null
+    var sayac = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cameraExecutor = Executors.newSingleThreadExecutor()
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
@@ -43,24 +55,6 @@ class MainActivity : AppCompatActivity() {
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-
-
-
-
-
-
-
-
-
-
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
-//        val f = File("/sdcard/DCIM/100ANDRO/DSC_0001.JPG")
-//        val bitmap2 = BitmapFactory.decodeFile(f.absolutePath)
-//        imageView.setImageBitmap(bitmap2)
-
-
     }
 
     private fun startCamera() {
@@ -83,30 +77,26 @@ class MainActivity : AppCompatActivity() {
 
             // Camerax imageAnalyzer
             // Take frame from camerax
-
             val imageAnalyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, LuminosityAnalyzer {
-//                        runOnUiThread {
-//                            //Rotate and set image to frame that comming from analyzer
-//
-//                            //imageView.setImageBitmap(rotate90FImage(it))
-//
-//                        }
+
+                        runOnUiThread {
+                            //Rotate and set image to frame that comming from analyzer
+                            imageView.setImageBitmap(rotate90FImage(it))
+
+                        }
                         // Socket connection and send data.
                         GlobalScope.launch {
 
                             try {
                                 val address = "192.168.1.103"
-                                val port = 8989
-
+                                val port = 12400
                                 client = Client(address, port)
-                                client.write(it)
-
-
+                                client?.write(it)
+                                delay(40)
                             } catch (e: Exception) {
-                                println("hataaaaaa")
                                 e.printStackTrace()
                             }
                         }
@@ -140,8 +130,6 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(
             baseContext, it
         ) == PackageManager.PERMISSION_GRANTED
-
-        // Request Socket connection
     }
 
 
@@ -163,9 +151,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (client != null){
+            client!!.shutdown()
+        }
+        cameraExecutor.shutdown()
+//        val direct = ByteBuffer.allocateDirect(1024)
+//        val cleanerField: Field = direct.javaClass.getDeclaredField("cleaner")
+//        cleanerField.isAccessible = true
+//
+//        direct.clear()
+
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        if(client != null){
+            client!!.shutdown()
+        }
     }
 
     companion object {
@@ -191,7 +196,8 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
     }
 
     override fun analyze(image: ImageProxy) {
-//        Thread.sleep(100)
+
+        Thread.sleep(40)
         // Take frame from camera
         val yBuffer = image.planes[0].buffer // Y
         val vuBuffer = image.planes[2].buffer // VU
@@ -209,10 +215,9 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
         val out = ByteArrayOutputStream()
         yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 50, out)
         val imageBytes = out.toByteArray()
+        yBuffer.clear()
+        vuBuffer.clear()
 
-//        val daa = yBuffer.toByteArray()
-//        val pixels = daa.map { it.toInt() and 0xFF }
-//        println(imageBytes)
         listener(imageBytes)
 
         image.close()
