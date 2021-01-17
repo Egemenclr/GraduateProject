@@ -1,29 +1,29 @@
 package com.egemeninceler.donempro
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.egemeninceler.donempro.util.rotate90FImage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
-import java.lang.reflect.Field;
 
 typealias LumaListener = (byte: ByteArray) -> Unit
 
@@ -32,15 +32,16 @@ class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     var client: Client? = null
-    var sayac = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(Intent(applicationContext, ServerService::class.java))
+        } else {
+            startService(Intent(applicationContext, ServerService::class.java))
+        }
 
     }
 
@@ -49,12 +50,51 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera()
+            startCamera2()
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
+
+    }
+
+
+
+    private fun startCamera2() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
+
+        cameraProviderFuture.addListener(Runnable {
+            // Used to bind the lifecycle of cameras to the lifecycle owner
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+            // Preview
+            val preview = Preview.Builder()
+                .build()
+                .also {
+
+                    it.setSurfaceProvider(viewFinder.surfaceProvider)
+                }
+
+            // Select back camera as a default
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+            try {
+                // Unbind use cases before rebinding
+                cameraProvider.unbindAll()
+
+                // Bind use cases to camera
+                cameraProvider.bindToLifecycle(
+                    this, cameraSelector, preview
+                )
+
+            } catch (exc: Exception) {
+                Log.e(TAG, "Use case binding failed", exc)
+            }
+
+        }, ContextCompat.getMainExecutor(this))
+
     }
 
     private fun startCamera() {
@@ -84,7 +124,7 @@ class MainActivity : AppCompatActivity() {
 
                         runOnUiThread {
                             //Rotate and set image to frame that comming from analyzer
-                            imageView.setImageBitmap(rotate90FImage(it))
+//                            imageView.setImageBitmap(rotate90FImage(it))
 
                         }
                         // Socket connection and send data.
@@ -95,7 +135,12 @@ class MainActivity : AppCompatActivity() {
                                 val port = 12400
                                 client = Client(address, port)
                                 client?.write(it)
-                                delay(40)
+//                                val socket = Socket("192.168.1.104", 12400)
+//                                val scanner = Scanner(socket.getInputStream())
+//                                val printWriter = PrintWriter(socket.getOutputStream())
+//                                while (scanner.hasNextLine()) {
+//                                    Log.d("ege", "${ scanner.nextLine() }")
+//                                }
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -139,7 +184,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startCamera()
+                startCamera2()
             } else {
                 Toast.makeText(
                     this,
@@ -153,7 +198,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (client != null){
+        if (client != null) {
             client!!.shutdown()
         }
         cameraExecutor.shutdown()
@@ -168,7 +213,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
-        if(client != null){
+        if (client != null) {
             client!!.shutdown()
         }
     }
@@ -197,7 +242,7 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
 
     override fun analyze(image: ImageProxy) {
 
-        Thread.sleep(40)
+        Thread.sleep(500)
         // Take frame from camera
         val yBuffer = image.planes[0].buffer // Y
         val vuBuffer = image.planes[2].buffer // VU
@@ -218,6 +263,7 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
         yBuffer.clear()
         vuBuffer.clear()
 
+        println("deneme:é " + image.width + image.height)
         listener(imageBytes)
 
         image.close()
