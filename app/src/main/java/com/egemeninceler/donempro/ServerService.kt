@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -12,16 +13,21 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import java.io.DataInputStream
-import java.io.DataOutputStream
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ServerService: Service(){
+
     private var serverSocket: ServerSocket? = null
     private val working = AtomicBoolean(true)
+
+
+
+
     private val runnable = Runnable {
+
         var socket: Socket? = null
         try {
             serverSocket = ServerSocket(PORT)
@@ -30,11 +36,16 @@ class ServerService: Service(){
                     socket = serverSocket!!.accept()
                     Log.i(TAG, "New client: $socket")
                     val dataInputStream = DataInputStream(socket.getInputStream())
-                    val dataOutputStream = DataOutputStream(socket.getOutputStream())
+
 
                     // Use threads for each client to communicate with them simultaneously
-                    val t: Thread = ClientHandler(dataInputStream, dataOutputStream)
+                    var instance = ClientHandler(dataInputStream, baseContext)
+                    val t: Thread = Thread(instance)
                     t.start()
+                    var list = instance.getList()
+                    println("liste: $list ${list.size}")
+//                    Toast.makeText(applicationContext, list[2] as String, Toast.LENGTH_SHORT).show()
+
                 } else {
                     Log.e(TAG, "Couldn't create ServerSocket!")
                 }
@@ -49,7 +60,7 @@ class ServerService: Service(){
         }
     }
     override fun onBind(p0: Intent?): IBinder? {
-        return null
+            return null
     }
     override fun onCreate() {
         startMeForeground()

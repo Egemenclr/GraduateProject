@@ -61,6 +61,9 @@ dependencies {
 
     //gson
     implementation 'com.google.code.gson:gson:2.8.6'
+    //broadcastreceiver
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+
 
 
 

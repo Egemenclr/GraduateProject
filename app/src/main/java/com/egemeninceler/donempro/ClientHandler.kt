@@ -1,28 +1,47 @@
 package com.egemeninceler.donempro
 
-import android.util.JsonReader
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.egemeninceler.donempro.Model.Model
-import com.google.gson.Gson
-import com.google.gson.JsonParser
-import org.json.JSONObject
-import java.io.*
-import java.lang.Exception
+import java.io.DataInputStream
+import java.io.IOException
 import java.nio.charset.Charset
-import java.util.*
-import kotlin.reflect.typeOf
 
-class ClientHandler(private val dataInputStream: DataInputStream, private val dataOutputStream: DataOutputStream) : Thread() {
+class ClientHandler(
+    private val dataInputStream: DataInputStream? = null,
+    private val context: Context? = null
+) : Thread() {
+    @Volatile
+    public var deneme = arrayOf(-1, "egemen")
+
+
     override fun run() {
         while (true) {
             try {
-                println("datainputstream ${dataInputStream.available()}")
-                if(dataInputStream.available() > 0){
 
-                    //Log.i(TAG, "Received: " + dataInputStream.readUTF())
+//                println("datainputstream ${dataInputStream!!.available()}")
+                if (dataInputStream!!.available() > 0) {
+
+//                    Log.i(TAG, "Received: " + dataInputStream.readUTF())
                     println("res")
-                    val response = dataInputStream.bufferedReader(Charset.forName("utf-8"))
-                    println("response: " +response.readLine())
+                    var response  = dataInputStream.readUTF()
+//                    val response = dataInputStream.bufferedReader(Charset.forName("utf-8"))
+
+                    deneme = arrayOf(250, 434, "cat", 97.76)
+                    var m = Model(
+                        deneme[0] as Int, deneme[1] as Int,
+                        deneme[2] as String, deneme[3] as Double
+                    )
+
+                    var intent = Intent("com.android.activiy.send_data")
+                    intent.putExtra("model", dataInputStream.readUTF())
+                    try {
+                        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
 
 
 //                    dataOutputStream.writeUTF("Hello Client")
@@ -49,6 +68,10 @@ class ClientHandler(private val dataInputStream: DataInputStream, private val da
                 }
             }
         }
+    }
+
+    fun getList(): Array<out Any> {
+        return deneme
     }
 
     companion object {

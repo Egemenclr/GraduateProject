@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.net.Socket
 
-class Client(address: String, var port: Int) {
+class Client(address: String, port: Int) {
     var connection: Socket = Socket(address, port)
 
     init {
@@ -26,8 +26,9 @@ class Client(address: String, var port: Int) {
             val bitmap = rotate90FImage(bytes)
             resizeImage(bitmap!!).compress(Bitmap.CompressFormat.JPEG, 50, baos)
             val byteArray = baos.toByteArray()
-
+            Thread.sleep(250)
             writer.write(byteArray)
+
             writer.write("sended".toByteArray())
             writer.flush()
             baos.flush()
