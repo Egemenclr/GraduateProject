@@ -12,13 +12,22 @@ import android.graphics.YuvImage
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginStart
+import androidx.core.view.marginTop
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.egemeninceler.donempro.ViewModel.MainViewModel
 import com.egemeninceler.donempro.util.rotate90FImage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
@@ -41,13 +50,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(applicationContext, ServerService::class.java))
         } else {
             startService(Intent(applicationContext, ServerService::class.java))
 
         }
-
+        print("aa")
     }
 
     override fun onResume() {
@@ -73,14 +84,33 @@ class MainActivity : AppCompatActivity() {
     private val mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // Extract data included in the Intent
-            val message = intent.getStringExtra("model")
-            Log.d("receiver", "Got message: $message")
+            var message = intent.getStringExtra("model")
+            println("Got message: $message")
 //            Log.d("receiver", "Content: ${message?.type}")
             if (message != null) {
-                var stringArray = message.split(",")
+                println("mesaj bos degil")
+
+                //message = message.replace('\n', ' ')
+                //message.split('\n')
+                message = message.replace('[', ' ')
+                message = message.replace(']', ' ')
+                var items = message.split(',')
                 runOnUiThread {
-                    Toast.makeText(applicationContext, stringArray[2], Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(applicationContext, stringArray, Toast.LENGTH_SHORT).show()
+
+                    Log.d("item[0]", items.toString())
+                    if(items.size > 1){
+
+                        var params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                        params.setMargins(items[0].toFloat().toInt(), items[1].toFloat().toInt(), 10, 10)
+                        bulunan.layoutParams = params
+                        bulunan.text = items[2]
+                        bulunan.visibility = View.VISIBLE
+                    }
                 }
+            }else{
+                println("Got message: bos")
+
             }
 
         }
@@ -117,19 +147,18 @@ class MainActivity : AppCompatActivity() {
                             //Rotate and set image to frame that comming from analyzer
                             imageView.setImageBitmap(rotate90FImage(it))
                             val instance = ClientHandler(context = baseContext)
-
-                            var liste = instance.getList()
-                            println("liste:" + liste[0])
                         }
 
                         // Socket connection and send data.
                         GlobalScope.launch {
 
                             try {
-                                val address = "192.168.1.103"
+                                val address = "192.168.1.105"
                                 val port = 12400
+
                                 client = Client(address, port)
                                 client?.write(it)
+
 //                                val socket = Socket("192.168.1.104", 12400)
 //                                val scanner = Scanner(socket.getInputStream())
 //                                val printWriter = PrintWriter(socket.getOutputStream())
@@ -237,7 +266,7 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
 
     override fun analyze(image: ImageProxy) {
 
-        Thread.sleep(100)
+        Thread.sleep(250)
         // Take frame from camera
         val yBuffer = image.planes[0].buffer // Y
         val vuBuffer = image.planes[2].buffer // VU

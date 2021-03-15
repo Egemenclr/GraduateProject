@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import java.io.DataInputStream
 import java.io.IOException
+import java.io.PushbackInputStream
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
@@ -30,11 +31,13 @@ class ServerService: Service(){
 
         var socket: Socket? = null
         try {
+
             serverSocket = ServerSocket(PORT)
             while (working.get()) {
                 if (serverSocket != null) {
                     socket = serverSocket!!.accept()
                     Log.i(TAG, "New client: $socket")
+
                     val dataInputStream = DataInputStream(socket.getInputStream())
 
 
@@ -42,8 +45,8 @@ class ServerService: Service(){
                     var instance = ClientHandler(dataInputStream, baseContext)
                     val t: Thread = Thread(instance)
                     t.start()
-                    var list = instance.getList()
-                    println("liste: $list ${list.size}")
+                    //var list = instance.getList()
+                    //println("liste: $list ${list.size}")
 //                    Toast.makeText(applicationContext, list[2] as String, Toast.LENGTH_SHORT).show()
 
                 } else {

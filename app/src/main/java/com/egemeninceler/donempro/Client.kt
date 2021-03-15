@@ -1,18 +1,21 @@
 package com.egemeninceler.donempro
 
 import android.graphics.Bitmap
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.egemeninceler.donempro.ViewModel.MainViewModel
 import com.egemeninceler.donempro.util.rotate90FImage
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.net.Socket
 
-class Client(address: String, port: Int) {
+class Client(address: String, port: Int){
     var connection: Socket = Socket(address, port)
+    var clientHandler = ClientHandler()
 
     init {
 
-        //println("Connected to server at $address port $port")
-
+        //println("Connected to server at $address port $port"
     }
 
 
@@ -26,10 +29,12 @@ class Client(address: String, port: Int) {
             val bitmap = rotate90FImage(bytes)
             resizeImage(bitmap!!).compress(Bitmap.CompressFormat.JPEG, 50, baos)
             val byteArray = baos.toByteArray()
+
+
             Thread.sleep(250)
             writer.write(byteArray)
-
             writer.write("sended".toByteArray())
+            //clientHandler.returnValue()
             writer.flush()
             baos.flush()
 

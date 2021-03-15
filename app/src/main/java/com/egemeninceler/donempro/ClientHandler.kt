@@ -5,48 +5,63 @@ import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.egemeninceler.donempro.Model.Model
-import java.io.DataInputStream
-import java.io.IOException
+import java.io.*
+import java.net.ServerSocket
+import java.net.Socket
 import java.nio.charset.Charset
+import java.util.*
 
 class ClientHandler(
     private val dataInputStream: DataInputStream? = null,
     private val context: Context? = null
 ) : Thread() {
-    @Volatile
-    public var deneme = arrayOf(-1, "egemen")
 
+
+    var geldiMi = false
+
+    //var dataInputStream = socket?.getInputStream()
 
     override fun run() {
+
         while (true) {
             try {
 
+
 //                println("datainputstream ${dataInputStream!!.available()}")
-                if (dataInputStream!!.available() > 0) {
+                if (dataInputStream!!.available() >= 0) {
 
-//                    Log.i(TAG, "Received: " + dataInputStream.readUTF())
-                    println("res")
-                    var response  = dataInputStream.readUTF()
-//                    val response = dataInputStream.bufferedReader(Charset.forName("utf-8"))
+                    var socketReadStream    = BufferedReader(InputStreamReader(dataInputStream))
+                    var line = socketReadStream.readLine()
 
-                    deneme = arrayOf(250, 434, "cat", 97.76)
-                    var m = Model(
-                        deneme[0] as Int, deneme[1] as Int,
-                        deneme[2] as String, deneme[3] as Double
-                    )
 
-                    var intent = Intent("com.android.activiy.send_data")
-                    intent.putExtra("model", dataInputStream.readUTF())
-                    try {
-                        LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    while(line != null ) {
+                        geldiMi = true
+                        var intent = Intent("com.android.activiy.send_data")
+                        intent.putExtra("model", line.toString())
+                        //intent.putExtra("model", deneme)
+
+                        try {
+                            LocalBroadcastManager.getInstance(context!!).sendBroadcast(intent)
+
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        line = socketReadStream.readLine()
+
+
                     }
+
 
 
 //                    dataOutputStream.writeUTF("Hello Client")
 //                    sleep(2000L)
+                }else{
+                    print("bosss")
                 }
+
+
+
+
             } catch (e: IOException) {
                 println("debug")
                 e.printStackTrace()
@@ -70,8 +85,13 @@ class ClientHandler(
         }
     }
 
-    fun getList(): Array<out Any> {
-        return deneme
+    fun returnValue(){
+        println("itemG:" + geldiMi)
+        while (!geldiMi){
+            println("itemW: bekleniyor")
+        }
+        geldiMi = false
+        return
     }
 
     companion object {

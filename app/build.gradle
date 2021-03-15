@@ -64,6 +64,8 @@ dependencies {
     //broadcastreceiver
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
+    //liveData
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
 
 
