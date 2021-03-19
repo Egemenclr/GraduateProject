@@ -11,11 +11,11 @@ import android.graphics.Rect
 import android.graphics.YuvImage
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -31,11 +31,13 @@ import com.egemeninceler.donempro.ViewModel.MainViewModel
 import com.egemeninceler.donempro.util.rotate90FImage
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.concurrent.timer
 
 typealias LumaListener = (byte: ByteArray) -> Unit
 
@@ -44,11 +46,24 @@ class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     var client: Client? = null
-
-
+    lateinit var frameLayout: FrameLayout
+    lateinit var linearLayout: LinearLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        frameLayout = findViewById<FrameLayout>(R.id.frameLayout)
+        /*
+        var textView = TextView(this)
+        var params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+        params.setMargins(254.0.toFloat().toInt(), 341.0.toFloat().toInt(), 10, 10)
+        textView.layoutParams = params
+        textView.text = "laptop"
+
+        frameLayout.addView(textView)
+         */
+
+
 
 
 
@@ -95,22 +110,47 @@ class MainActivity : AppCompatActivity() {
                 message = message.replace('[', ' ')
                 message = message.replace(']', ' ')
                 var items = message.split(',')
+                println()
+
+                //Toast.makeText(applicationContext, stringArray, Toast.LENGTH_SHORT).show()
                 runOnUiThread {
-                    //Toast.makeText(applicationContext, stringArray, Toast.LENGTH_SHORT).show()
+                    try {
 
-                    Log.d("item[0]", items.toString())
-                    if(items.size > 1){
+                        if (items.size > 1) {
+                            var size = items.size - 1
+                            var temp = 1
 
-                        var params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-                        params.setMargins(items[0].toFloat().toInt(), items[1].toFloat().toInt(), 10, 10)
-                        bulunan.layoutParams = params
-                        bulunan.text = items[2]
-                        bulunan.visibility = View.VISIBLE
+
+                            for (i in 0..size step 3) {
+                                if (temp == 1) {
+                                    var params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                                    params.setMargins(items[i].toFloat().toInt(), items[i+1].toFloat().toInt(), 10, 10)
+                                    bulunan1.layoutParams = params
+                                    bulunan1.text = items[i+2]
+                                    bulunan1.visibility = View.VISIBLE
+
+                                }
+                                else if (temp == 2) {
+                                    var params = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                                    params.setMargins(items[i].toFloat().toInt(), items[i+1].toFloat().toInt(), 10, 10)
+                                    bulunan2.layoutParams = params
+                                    bulunan2.text = items[i+2]
+                                    bulunan2.visibility = View.VISIBLE
+
+                                }
+                                temp += 1
+                            }
+
+
+                        }
+                    } catch (exception: java.lang.Exception) {
+                        Log.e("Error", exception.toString())
+                        println(exception)
+                        println()
                     }
-                }
-            }else{
-                println("Got message: bos")
 
+
+                }
             }
 
         }
@@ -266,7 +306,7 @@ private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnal
 
     override fun analyze(image: ImageProxy) {
 
-        Thread.sleep(250)
+        //Thread.sleep(250)
         // Take frame from camera
         val yBuffer = image.planes[0].buffer // Y
         val vuBuffer = image.planes[2].buffer // VU
