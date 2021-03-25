@@ -20,35 +20,21 @@ import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ServerService: Service(){
-
     private var serverSocket: ServerSocket? = null
     private val working = AtomicBoolean(true)
-
-
-
-
     private val runnable = Runnable {
 
         var socket: Socket? = null
         try {
 
-            serverSocket = ServerSocket(PORT)
+            serverSocket = ServerSocket(getString(R.string.listenPort).toInt())
             while (working.get()) {
                 if (serverSocket != null) {
                     socket = serverSocket!!.accept()
-                    Log.i(TAG, "New client: $socket")
-
                     val dataInputStream = DataInputStream(socket.getInputStream())
-
-
-                    // Use threads for each client to communicate with them simultaneously
                     var instance = ClientHandler(dataInputStream, baseContext)
                     val t: Thread = Thread(instance)
                     t.start()
-                    //var list = instance.getList()
-                    //println("liste: $list ${list.size}")
-//                    Toast.makeText(applicationContext, list[2] as String, Toast.LENGTH_SHORT).show()
-
                 } else {
                     Log.e(TAG, "Couldn't create ServerSocket!")
                 }
@@ -96,6 +82,5 @@ class ServerService: Service(){
 
     companion object {
         private val TAG = ServerService::class.java.simpleName
-        private const val PORT = 12400
     }
 }

@@ -8,7 +8,7 @@ fun rotate90FImage(bytes: ByteArray): Bitmap? {
     val matrix = Matrix()
 
     matrix.postRotate(90.toFloat())
-    return Bitmap.createBitmap(
+    var bitmap  = Bitmap.createBitmap(
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size),
         0,
         0,
@@ -17,4 +17,5 @@ fun rotate90FImage(bytes: ByteArray): Bitmap? {
         matrix,
         true
     )
+    return bitmap
 }

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">DonemPro</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sendIP">192.168.1.103</string>
+    <string name="sendPort">9999</string>
+    <string name="listenPort">12400</string>
 </resources>
