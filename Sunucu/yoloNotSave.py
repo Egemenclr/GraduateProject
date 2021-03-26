@@ -10,8 +10,7 @@ import socket
 from PIL import Image
 import io
 
-s =  socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-s.connect(("192.168.1.104", 12400))
+
 class BoundBox:
 	def __init__(self, xmin, ymin, xmax, ymax, objness = None, classes = None):
 		self.xmin = xmin
@@ -159,7 +158,7 @@ def draw_boxes(image, v_boxes, v_labels, v_scores):
         box = v_boxes[i]
         y1, x1, y2, x2 = box.ymin, box.xmin, box.ymax, box.xmax
         x_mean, y_mean= (x2 + x1)/2, (y2 + y1)/2
-        temp_return_boxes.append([x_mean, y_mean, v_labels[i], round(v_scores[i], 2)])
+        temp_return_boxes.append([x_mean, y_mean, v_labels[i]])
     return temp_return_boxes
     
 # load yolov3 model
@@ -169,25 +168,41 @@ input_w, input_h = 100, 100
 (imageN, image_w, image_h) = image_path(cv2.imread("imageDeneme/a1.jpg"))
 yhat = model.predict(imageN)
     
-TCP_IP = "192.168.1.105"
+TCP_IP = "192.168.1.103"
 print(TCP_IP)
-TCP_PORT = 12400
+TCP_PORT = 9999
 print(TCP_PORT)
 #PORT = 12400        # The port used by the server
 size = -1
 quit = b'sended'
+s =  socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+isTempC = False
 def createSocket():
     try:
-
+        # Verinin dinlendiği socket 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((TCP_IP, TCP_PORT))
         print("Kanal Dinleniyor.")
         sock.listen(10)
     except socket.error:
-        print()
+        print("Hata!", socket.error)
         #("Hata!", socket.error
     socketConnect(sock)
-
+  
+def createSendSocket(image):
+    global isTempC
+    if(isTempC == False):
+        try:
+            # Verinin dinlendiği socket 
+            s.connect(("192.168.1.104", 12400))
+            print("Kanal Dinleniyor.")
+            isTempC = True
+        except socket.error:
+            print("Hata!", socket.error)
+            #("Hata!", socket.error
+        
+    sendData(image, s)
+    
 def socketConnect(sock):
     k = 0
     while True:
@@ -223,14 +238,15 @@ def socketConnect(sock):
         
     sock.close()
 
-def sendData(image):
-   
-    #s.send(b'\n'+ data.encode("utf-8"))
-    data = str(image)
-    s.send(b'\n')
-    #print("data", data)
-    #data2 = str((254.0, 341.5, 'laptop', 97.1))
-    s.send(bytes(data, encoding="utf-8"))
+def sendData(image, s):
+   global isTempC
+   try:
+        data = str(image)
+        s.send(data.encode() + b'\n')
+   except socket.error:
+        print("Gönderirken hata!", socket.error)
+        createSendSocket(image)
+        
     
 def predict(image_get):
     timeStart = int(round(time.time() * 1000))
@@ -272,7 +288,7 @@ def predict(image_get):
     denemeImage = draw_boxes(image_get, v_boxes, v_labels, v_scores)
     print(denemeImage)
     #♦print("273")
-    sendData(denemeImage)
+    createSendSocket(denemeImage)
     print("Time PRINT: ", str(int(round(time.time() * 1000))- timeStart) + " ms")
 
 
