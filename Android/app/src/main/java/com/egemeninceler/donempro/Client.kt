@@ -27,6 +27,7 @@ class Client(address: String, port: Int){
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
     }
 
     fun resizeImage(bitmap: Bitmap): Bitmap {

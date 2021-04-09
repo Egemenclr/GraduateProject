@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+android:background="@color/darkGray"
+
+    >
+    <TextView
+        android:id="@+id/informationStatics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/lightBlue"
+        android:textSize="24dp"
+        android:textStyle="bold"></TextView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        >
+        <TextView
+            android:id="@+id/infoS"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            >
+
+        </TextView>
+        <TextView
+
+            android:id="@+id/infoValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+
+            android:layout_weight="1"
+            android:textColor="@color/lightOrange"
+            android:gravity="end"
+            android:textSize="15dp"
+            />
+
+
+    </LinearLayout>
+</LinearLayout>

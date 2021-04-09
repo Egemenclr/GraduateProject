@@ -9,13 +9,7 @@
     app:behavior_hideable="true"
     app:behavior_peekHeight="160dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-
-    android:visibility="invisible"
-
-
-    >
-
-
+    android:visibility="invisible">
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

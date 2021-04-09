@@ -1,10 +1,9 @@
-package com.egemeninceler.donempro
+package com.egemeninceler.donempro.Service
 
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -12,9 +11,10 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.egemeninceler.donempro.ClientHandler
+import com.egemeninceler.donempro.R
 import java.io.DataInputStream
 import java.io.IOException
-import java.io.PushbackInputStream
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
@@ -32,7 +32,10 @@ class ServerService: Service(){
                 if (serverSocket != null) {
                     socket = serverSocket!!.accept()
                     val dataInputStream = DataInputStream(socket.getInputStream())
-                    var instance = ClientHandler(dataInputStream, baseContext)
+                    var instance = ClientHandler(
+                        dataInputStream,
+                        baseContext
+                    )
                     val t: Thread = Thread(instance)
                     t.start()
                 } else {
