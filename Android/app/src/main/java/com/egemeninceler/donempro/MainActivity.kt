@@ -66,13 +66,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
-                println("new state: "+ newState)
                 if (newState == 5){
                     isCheck = false
                     startCamera()
                 }
             }
-
         })
 
         // Buton tıklama işlemleri

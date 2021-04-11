@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.View.MeasureSpec
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.egemeninceler.donempro.Adapter.GridAdapter
@@ -28,9 +29,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-
-val country = ""
-
 class DetailActivity : AppCompatActivity() {
 
 
@@ -42,6 +40,7 @@ class DetailActivity : AppCompatActivity() {
     lateinit var infoLinearLayoutAdapter: InfoLinearLayoutAdapter
     var cityStatictics: ArrayList<Any> = ArrayList<Any>()
     val items: ArrayList<Cities> = ArrayList<Cities>()
+    var progressBar: ProgressBar? = null
 
     var averagePrices: ArrayList<String> = ArrayList<String>()
     var itemNames: ArrayList<String> = ArrayList<String>()
@@ -55,16 +54,18 @@ class DetailActivity : AppCompatActivity() {
     var clothingItems: ArrayList<Prices> = ArrayList<Prices>()
     var rentItems: ArrayList<Prices> = ArrayList<Prices>()
     var salaryItems: ArrayList<Prices> = ArrayList<Prices>()
+    var cpiItems: ArrayList<CPI> = ArrayList<CPI>()
 
     var allPriceLists: ArrayList<ArrayList<Prices>> = ArrayList<ArrayList<Prices>>()
     var pieChart: PieChart? = null
+    lateinit var view: WebView
 
 
     lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-        var cityMap= mutableMapOf<String,Int>()
+        var cityMap = mutableMapOf<String, Int>()
         cityMap.put("Istanbul", 2800)
         cityMap.put("Amsterdam", 1680)
         cityMap.put("Manchester", 1580)
@@ -77,6 +78,8 @@ class DetailActivity : AppCompatActivity() {
         setItems(items)
 
         pieChart = findViewById(R.id.piechart)
+        view = findViewById<WebView>(R.id.webViewnumbeo)
+        progressBar = findViewById(R.id.progressBar)
 
         val setTime = Handler(Looper.getMainLooper())
         setTime.post(object : Runnable {
@@ -116,6 +119,7 @@ class DetailActivity : AppCompatActivity() {
 
 
 
+
         adapter = GridAdapter(this, items)
         gridView = findViewById<GridView>(R.id.gridView)
         listView = findViewById<ListView>(R.id.listView)
@@ -127,6 +131,19 @@ class DetailActivity : AppCompatActivity() {
         var bottomSheet = findViewById<View>(R.id.bottomSheetTable)
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior.addBottomSheetCallback(object:
+            BottomSheetBehavior.BottomSheetCallback(){
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                println("state: "+ newState)
+                if (newState == 4){
+                    bottomSheet.visibility = View.INVISIBLE
+                }
+            }
+        })
         gridView.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(
                 parent: AdapterView<*>?,
@@ -136,66 +153,119 @@ class DetailActivity : AppCompatActivity() {
             ) {
 
                 getCityStatisticsRate(items[position].cityName)
-                bottomSheet.visibility = View.VISIBLE
-                loadCountries(items[position].cityName, items[position].currency, cityMap.get(items[position].cityName)!!)
-                setData()
-            }
 
+                loadCountries(
+                    items[position].cityName,
+                    items[position].currency,
+                    cityMap.get(items[position].cityName)!!
+                )
+                if(progressBar != null){
+
+                    progressBar!!.visibility = View.VISIBLE
+
+                }
+            }
         }
 
 
+
+        numbeoButton.setOnClickListener {
+            view.visibility = View.VISIBLE
+            view.getSettings().setJavaScriptEnabled(true)
+            view.loadUrl("https://www.numbeo.com/cost-of-living/")
+
+        }
     }
-    fun setData(){
+
+    override fun onBackPressed() {
+
+        view.visibility = View.GONE
+
+
+    }
+
+
+    private fun getCPI(cpiItems: ArrayList<CPI>, itemID: Int): Double {
+
+        val iterator = cpiItems.iterator()
+        while (iterator.hasNext()) {
+            val item = iterator.next()
+            for (i in 0..(item.items.size - 1)) {
+                if (itemID == item.items[i].item_id) {
+                    return item.items[i].cpi_factor
+                }
+            }
+        }
+
+        return 1.0
+    }
+
+    fun setData(allPriceList: ArrayList<ArrayList<Prices>>, cpiItems: ArrayList<CPI>) {
+        var liste = hashMapOf<String, Double>()
+        for (item in allPriceList) {
+            var total = 0.0
+            for (i in item) {
+                var cpi_factor = getCPI(cpiItems, i.item_id)
+                total += i.average_price*cpi_factor
+
+            }
+            //item.item_name.split(",").dropLast(1)
+
+            liste.put(item[0].item_name.split(",").last(), total)
+
+
+
+        }
+        print("a")
         pieChart?.clearChart()
         // Set the data and color to the pie chart
         pieChart?.addPieSlice(
             PieModel(
                 "Transportation",
-                Integer.parseInt("20").toFloat(),
-                Color.parseColor("#3366CC"))
+                liste.get(" Transportation")!!.toFloat(),
+                Color.parseColor("#3366CC")
+            )
+
         )
         pieChart?.addPieSlice(
             PieModel(
                 "Clothing And Shoes",
-                Integer.parseInt("20").toFloat(),
-                Color.parseColor("#F83028"))
+                liste.get(" Clothing And Shoes")!!.toFloat(),
+                Color.parseColor("#F83028")
+            )
         )
         pieChart?.addPieSlice(
             PieModel(
                 "Sports And Leisure",
-                Integer.parseInt("10").toFloat(),
-                Color.parseColor("#673AB7"))
+                liste.get(" Sports And Leisure")!!.toFloat(),
+                Color.parseColor("#673AB7")
+            )
         )
         pieChart?.addPieSlice(
             PieModel(
                 "Markets",
-                Integer.parseInt("10").toFloat(),
-                Color.parseColor("#007600"))
+                liste.get(" Markets")!!.toFloat(),
+                Color.parseColor("#007600")
+            )
         )
         pieChart?.addPieSlice(
             PieModel(
                 "Utilities",
-                Integer.parseInt("10").toFloat(),
-                Color.parseColor("#AD3DA4"))
-        )
-        pieChart?.addPieSlice(
-            PieModel(
-                "Rent Per Month",
-                Integer.parseInt("10").toFloat(),
-                Color.parseColor("#F16795"))
+                liste.get(" Utilities (Monthly)")!!.toFloat(),
+                Color.parseColor("#AD3DA4")
+            )
         )
         pieChart?.addPieSlice(
             PieModel(
                 "Restaurants",
-                Integer.parseInt("10").toFloat(),
-                Color.parseColor("#FF9800"))
+                liste.get(" Restaurants")!!.toFloat(),
+                Color.parseColor("#FF9800")
+            )
         )
 
         // To animate the pie chart
-        pieChart?.startAnimation();
+        pieChart?.startAnimation()
     }
-
-
 
 
     private fun setItems(items: ArrayList<Cities>) {
@@ -209,18 +279,20 @@ class DetailActivity : AppCompatActivity() {
         items.add(Cities("Paris", "EUR", R.mipmap.paris))
         items.add(Cities("Manchester", "EUR", R.mipmap.london))
     }
-    private fun getCityStatisticsRate(cityName: String){
+
+    private fun getCityStatisticsRate(cityName: String) {
 
         cityStatictics.clear()
         val destinationService = ServiceBuilder.buildService(CountryService::class.java)
         val requestPollution = destinationService.getPollution(cityName)
 
-        requestPollution.enqueue(object:  Callback<Pollution>{
+        requestPollution.enqueue(object : Callback<Pollution> {
             override fun onResponse(call: Call<Pollution>, response: Response<Pollution>) {
-                if(response.isSuccessful){
+                if (response.isSuccessful) {
                     cityStatictics.add(response.body()!!)
                 }
             }
+
             override fun onFailure(call: Call<Pollution>, t: Throwable) {
                 Log.d("Response", "countrylist : fail $t")
 
@@ -230,13 +302,14 @@ class DetailActivity : AppCompatActivity() {
         })
 
         val requestCrime = destinationService.getCrime(cityName)
-        requestCrime.enqueue(object: Callback<Crime>{
+        requestCrime.enqueue(object : Callback<Crime> {
 
             override fun onResponse(call: Call<Crime>, response: Response<Crime>) {
-                if(response.isSuccessful){
+                if (response.isSuccessful) {
                     cityStatictics.add(response.body()!!)
                 }
             }
+
             override fun onFailure(call: Call<Crime>, t: Throwable) {
                 Log.d("Response", "countrylist : fail $t")
 
@@ -246,16 +319,16 @@ class DetailActivity : AppCompatActivity() {
         })
 
 
-
         val requestHealthcare = destinationService.getHealtcare(cityName)
-        requestHealthcare.enqueue(object: Callback<Healtcare>{
+        requestHealthcare.enqueue(object : Callback<Healtcare> {
 
             override fun onResponse(call: Call<Healtcare>, response: Response<Healtcare>) {
-                if(response.isSuccessful){
+                if (response.isSuccessful) {
                     cityStatictics.add(response.body()!!)
 
                 }
             }
+
             override fun onFailure(call: Call<Healtcare>, t: Throwable) {
                 Log.d("Response", "countrylist : fail $t")
 
@@ -263,6 +336,24 @@ class DetailActivity : AppCompatActivity() {
                     .show()
             }
         })
+        val requestCPI = destinationService.getCPI(cityName)
+        requestCPI.enqueue(object : Callback<CPI> {
+
+            override fun onResponse(call: Call<CPI>, response: Response<CPI>) {
+                if (response.isSuccessful) {
+                    cpiItems.add(response.body()!!)
+
+                }
+            }
+
+            override fun onFailure(call: Call<CPI>, t: Throwable) {
+                Log.d("Response", "countrylist : fail $t")
+
+                Toast.makeText(applicationContext, "Something went wrong $t", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        })
+
 
     }
 
@@ -281,6 +372,7 @@ class DetailActivity : AppCompatActivity() {
                     val currencyText = findViewById<TextView>(R.id.currency)
                     currencyText.text = currency
                     for (item in countryList.prices) {
+
                         when {
                             item.item_name.contains("Restaurants") -> {
                                 restaurantItems.add(item)
@@ -328,14 +420,16 @@ class DetailActivity : AppCompatActivity() {
                     allPriceLists.add(buyApartmentItems)
                     allPriceLists.add(salaryItems)
                     val iterator = allPriceLists.iterator()
-                    while(iterator.hasNext()){
+                    while (iterator.hasNext()) {
                         val item = iterator.next()
-                        if(item.size == 0){
+                        if (item.size == 0) {
                             iterator.remove()
                         }
                     }
+                    setData(allPriceLists, cpiItems)
 
-                    infoLinearLayoutAdapter = InfoLinearLayoutAdapter(applicationContext, cityStatictics)
+                    infoLinearLayoutAdapter =
+                        InfoLinearLayoutAdapter(applicationContext, cityStatictics)
                     infoLinearLayoutAdapter.notifyDataSetChanged()
                     infoListView.adapter = infoLinearLayoutAdapter
 
@@ -346,9 +440,12 @@ class DetailActivity : AppCompatActivity() {
                     setListViewHeightBasedOnChildren(infoListView)
                     setListViewHeightBasedOnChildren(listView)
 
+                    bottomSheetTable.visibility = View.VISIBLE
+                    if(progressBar != null){
+                        progressBar!!.visibility = View.INVISIBLE
 
 
-
+                    }
                 } else {
                     Log.d("Response", "countrylist : hata")
                     Toast.makeText(
@@ -366,7 +463,9 @@ class DetailActivity : AppCompatActivity() {
                     .show()
             }
         })
+
     }
+
     fun setListViewHeightBasedOnChildren(listView: ListView) {
         /**
          * Birden fazla listview tek view olarak scroll edebilmek için.
@@ -403,5 +502,6 @@ class DetailActivity : AppCompatActivity() {
         salaryItems.clear()
         childCareItems.clear()
         utilitiesItems.clear()
+        cpiItems.clear()
     }
 }

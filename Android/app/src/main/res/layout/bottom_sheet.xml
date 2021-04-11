@@ -7,10 +7,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
 
-    app:behavior_hideable="true"
+    app:behavior_hideable="false"
     app:behavior_peekHeight="32dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-    android:visibility="visible"
+    android:visibility="invisible"
     android:background="@color/darkGray"
 
     >
@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="10dp"
                     android:textColor="@color/white"
-                    android:paddingLeft="305dp"
+                    android:paddingLeft="290dp"
                     android:textSize="18dp"
 
                     />
@@ -258,27 +258,6 @@
                                 <View
                                     android:layout_width="15dp"
                                     android:layout_height="match_parent"
-                                    android:background="@color/RentPerMonth"/>
-
-
-                                <TextView
-                                    android:textColor="@color/white"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Rent Per Month"
-                                    android:paddingLeft="10dp"/>
-
-                            </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="15dp"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginTop="5dp">
-
-
-                                <View
-                                    android:layout_width="15dp"
-                                    android:layout_height="match_parent"
                                     android:background="@color/Restaurants"/>
 
 
@@ -299,8 +278,6 @@
             </LinearLayout>
 
         </ScrollView>
-
-
     </LinearLayout>
 
 

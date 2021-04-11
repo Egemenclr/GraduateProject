@@ -29,3 +29,12 @@ data class Crime(
     @SerializedName("worried_attacked") val worried_attacked: Double,
     @SerializedName("worried_home_broken") val worried_home_broken: Double,
 )
+
+data class CPI(
+    @SerializedName("items") val items: List<CPIModel>
+)
+data class CPIModel(
+    @SerializedName("cpi_factor") val cpi_factor: Double,
+    @SerializedName("item_id") val item_id: Int,
+    @SerializedName("category") val category: String,
+)
