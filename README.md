@@ -4,8 +4,9 @@
 telefondan gerçek zamanlı nesneleri tespit edip, bu nesneler hakkında internetten 
 veriler çekerek kullanıcı bilgilendirmek.</p>
 <p>
-  Proje detaylı bilgisine [buradan](github.com/Egemenclr/GraduateProject/blob/master/Bitirme_Projesi.pdf) ulaşabilirsiniz.
+  Proje detaylı bilgisine [buradan](https://github.com/Egemenclr/GraduateProject/blob/master/Bitirme_Projesi.pdf) ulaşabilirsiniz.
 </p>
+
 
 
 ## Outputs
