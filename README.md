@@ -5,6 +5,7 @@ telefondan gerçek zamanlı nesneleri tespit edip, bu nesneler hakkında interne
 veriler çekerek kullanıcı bilgilendirmek.</p>
 <p>Proje detaylı bilgisi için [GitHub Pages] tıklabilirsiniz.(https://github.com/Egemenclr/GraduateProject/blob/master/Bitirme_Projesi.pdf).</p>
 
-<h1><b>Outputs </b></h1>
-![](https://github.com/Egemenclr/GraduateProject/blob/master/numbeo.gif)
+
+## Outputs
 ![](https://github.com/Egemenclr/GraduateProject/blob/master/objectDetection.gif)
+![](https://github.com/Egemenclr/GraduateProject/blob/master/numbeo.gif)
