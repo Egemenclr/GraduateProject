@@ -8,7 +8,7 @@
     android:layout_height="wrap_content"
 
     app:behavior_hideable="false"
-    app:behavior_peekHeight="32dp"
+    app:behavior_peekHeight="64dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     android:visibility="invisible"
     android:background="@color/darkGray"
@@ -105,6 +105,7 @@
                     android:elevation="10dp"
                     app:cardCornerRadius="10dp"
                     android:background="@color/darkGray"
+
                     >
 
 

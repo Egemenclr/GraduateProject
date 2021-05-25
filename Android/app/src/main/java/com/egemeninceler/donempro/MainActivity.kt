@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var items: List<String>
     var isCheck = false
     lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    var progressBar: ProgressBar? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             startService(Intent(applicationContext, ServerService::class.java))
         }
+        progressBar = findViewById(R.id.progressBarMain)
         var bottomSheet = findViewById<View>(R.id.bottomSheet)
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.addBottomSheetCallback(object:
@@ -75,6 +77,10 @@ class MainActivity : AppCompatActivity() {
 
         // Buton tıklama işlemleri
         bulunan1.setOnClickListener {
+            if(progressBar != null){
+                progressBar!!.visibility = View.VISIBLE
+            }
+            progressBar!!.visibility = View.VISIBLE
             isCheck = true
             if (client != null) {
                 client!!.shutdown()
@@ -89,8 +95,15 @@ class MainActivity : AppCompatActivity() {
             var button = findViewById<Button>(R.id.detailButton)
             button.visibility = View.VISIBLE
             view.loadUrl("https://www.google.com/search?q=" + items[2] + "&tbm=shop")
+            if(progressBar != null){
+                progressBar!!.visibility = View.INVISIBLE
+            }
+
         }
         bulunan2.setOnClickListener {
+            if(progressBar != null){
+                progressBar!!.visibility = View.VISIBLE
+            }
             isCheck = true
             if (client != null) {
                 client!!.shutdown()
@@ -104,6 +117,9 @@ class MainActivity : AppCompatActivity() {
             var view = findViewById<WebView>(R.id.webView)
             view.getSettings().setJavaScriptEnabled(true)
             view.loadUrl("https://www.google.com/search?q=" + items[5] + "&tbm=shop")
+            if(progressBar != null){
+                progressBar!!.visibility = View.INVISIBLE
+            }
         }
         detailButton.setOnClickListener {
             var intent = Intent(this, DetailActivity::class.java)
@@ -278,6 +294,7 @@ class MainActivity : AppCompatActivity() {
         if (client != null) {
             client!!.shutdown()
         }
+        stopService(Intent(applicationContext, ServerService::class.java))
     }
 
     companion object {

@@ -27,7 +27,7 @@
 
     <Button
         android:id="@+id/bulunan1"
-        android:background="@drawable/roundedbutton"
+        android:background="@drawable/nesnerounded"
         android:visibility="invisible"
         android:layout_width="10dp"
         android:layout_height="10dp"
@@ -37,21 +37,39 @@
         />
     <Button
         android:id="@+id/bulunan2"
-        android:background="@drawable/roundedbutton"
+        android:background="@drawable/nesnerounded"
         android:visibility="invisible"
         android:layout_width="10dp"
         android:layout_height="10dp"
         android:clickable="true"
+        />
+    <ProgressBar
+        android:id="@+id/progressBarMain"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="300dp"
+        android:layout_marginBottom="61dp"
+        android:indeterminate="true"
+        android:max="100"
+        android:visibility="visible"
+        android:minWidth="120dp"
+        android:minHeight="50dp"
+
         />
 
     <include layout="@layout/bottom_sheet_persistent" />
 
     <Button
         android:id="@+id/detailButton"
-        android:layout_width="60dp"
+        android:layout_width="50dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@id/webView"
         android:background="@drawable/roundedbutton"
+        android:text="C"
+        android:textColor="@color/white"
+        android:textSize="20dp"
         app:layout_anchor="@+id/bottomSheet"
         app:layout_anchorGravity="top|end"
         >

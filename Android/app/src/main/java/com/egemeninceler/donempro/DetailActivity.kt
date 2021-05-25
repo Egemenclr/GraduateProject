@@ -178,8 +178,10 @@ class DetailActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-
         view.visibility = View.GONE
+
+        super.onBackPressed()
+
 
 
     }
@@ -216,7 +218,7 @@ class DetailActivity : AppCompatActivity() {
 
 
         }
-        print("a")
+
         pieChart?.clearChart()
         // Set the data and color to the pie chart
         pieChart?.addPieSlice(
@@ -437,8 +439,8 @@ class DetailActivity : AppCompatActivity() {
                     linearAdapter.notifyDataSetChanged()
                     listView.adapter = linearAdapter
 
-                    setListViewHeightBasedOnChildren(infoListView)
-                    setListViewHeightBasedOnChildren(listView)
+                    setListViewHeightBasedOnChildren(infoListView,450)
+                    setListViewHeightBasedOnChildren(listView, 150)
 
                     bottomSheetTable.visibility = View.VISIBLE
                     if(progressBar != null){
@@ -466,7 +468,7 @@ class DetailActivity : AppCompatActivity() {
 
     }
 
-    fun setListViewHeightBasedOnChildren(listView: ListView) {
+    fun setListViewHeightBasedOnChildren(listView: ListView, farketmez: Int) {
         /**
          * Birden fazla listview tek view olarak scroll edebilmek için.
          */
@@ -485,7 +487,8 @@ class DetailActivity : AppCompatActivity() {
             totalHeight += view.measuredHeight
         }
         val params = listView.layoutParams
-        params.height = (totalHeight).toInt() + listView.dividerHeight * listAdapter.count
+
+        params.height = (totalHeight-farketmez) + listView.dividerHeight * listAdapter.count
         listView.layoutParams = params
         listView.requestLayout()
     }

@@ -7,6 +7,21 @@
     android:background="@color/black"
     tools:context=".DetailActivity">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="300dp"
+        android:layout_marginBottom="61dp"
+        android:indeterminate="true"
+        android:max="100"
+        android:visibility="invisible"
+        android:minWidth="120dp"
+        android:minHeight="50dp"
+
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,32 +72,17 @@
             android:layout_width="match_parent"
             android:layout_height="45dp"
 
-            android:text = "Numbeo"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:background="@drawable/roundedetailbutton"
-            android:textAlignment="textStart"
-            android:layout_marginTop="10dp"
             android:layout_marginLeft="40dp"
+            android:layout_marginTop="10dp"
             android:layout_marginRight="40dp"
+            android:background="@drawable/roundedetailbutton"
             android:drawableLeft="@mipmap/numbeo"
-            />
+            android:text="Numbeo"
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:textColor="@color/white" />
     </LinearLayout>
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginLeft="300dp"
-        android:layout_marginBottom="61dp"
-        android:indeterminate="true"
-        android:max="100"
-        android:visibility="invisible"
-        android:minWidth="120dp"
-        android:minHeight="50dp"
 
-        />
     <include layout="@layout/bottom_sheet"/>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

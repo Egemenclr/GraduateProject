@@ -60,6 +60,9 @@ class ServerService: Service(){
     }
     override fun onDestroy() {
         working.set(false)
+        if (serverSocket != null){
+            serverSocket!!.close()
+        }
     }
     private fun startMeForeground() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
